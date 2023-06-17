@@ -10,6 +10,7 @@ public class Board : MonoBehaviour
     public GameObject[,] allGems;   // The 2D array that holds references to all the spawned gems on the board
     public List<GameObject> movingGems;
     public List<GameObject> matchingGems;
+    public List<GameObject> haltedGems;
     public bool isMoving = false;
     public bool isMatching = false;
     public int[] score;
@@ -25,6 +26,7 @@ public class Board : MonoBehaviour
         
         allGems = new GameObject[width, height];    // initializes the allGems array with the specified width and height
         movingGems = new List<GameObject>();
+        haltedGems = new List<GameObject>();
         SetUp();    // Spawns the gem game objects on the board, and fills the 2D array with their reference variables
         FindMatches();
         score = new int[5]{0, 0, 0, 0, 0};
@@ -35,9 +37,7 @@ public class Board : MonoBehaviour
             isMoving = true;
         } else if(isMoving){
             isMoving = false;
-            p("finding matches");
             FindMatches();
-            Print2DArray();
         }
         if(matchingGems.Count!=0){
             isMatching = true;
@@ -154,6 +154,73 @@ public class Board : MonoBehaviour
             }
             Debug.Log(s);
             s = "";
+        }
+    }
+
+    void PrintStack(){
+
+    }
+
+    void FindMatchesInStack(){
+        GameObject gem;
+        GameObject gemgem;
+        int gemXPosition = 0;
+        int gemYPosition = 0;
+        Stack<GameObject> horizontalStack = new Stack<GameObject>();
+        Stack<GameObject> verticalStack = new Stack<GameObject>();
+        while(haltedGems.Count>0){
+            gem = haltedGems[0];
+            haltedGems.RemoveAt(0);
+            gemXPosition = gem.GetComponent<Gem>().column;
+            gemYPosition = gem.GetComponent<Gem>().row;
+            
+            for(int x = gemXPosition + 1; x < width; x++){
+                gemgem = allGems[x, gemYPosition];
+                if(gemgem.CompareTag(gem.tag)){
+                    horizontalStack.Push(gemgem);
+                } else {
+                    break;
+                }
+            }
+            for(int x = gemXPosition - 1; x >= 0; x--){
+                gemgem = allGems[x, gemYPosition];
+                if(gemgem.CompareTag(gem.tag)){
+                    horizontalStack.Push(gemgem);
+                } else {
+                    break;
+                }
+            }
+            for(int y = gemYPosition + 1; y < height; y++){
+                gemgem = allGems[gemXPosition, y];
+                if(gemgem.CompareTag(gem.tag)){
+                    verticalStack.Push(gemgem);
+                } else {
+                    break;
+                }
+            }
+            for(int y = gemYPosition - 1; y >= 0; y--){
+                gemgem = allGems[gemXPosition, y];
+                if(gemgem.CompareTag(gem.tag)){
+                    verticalStack.Push(gemgem);
+                } else {
+                    break;
+                }
+            }
+            
+            if(horizontalStack.Count>=3){
+                while(horizontalStack.Count>0){
+                    horizontalStack.Pop().GetComponent<Gem>().isMatched = true;
+                }
+            } else {
+                horizontalStack.Clear();
+            }
+            if(verticalStack.Count>=3){
+                while(verticalStack.Count>0){
+                    verticalStack.Pop().GetComponent<Gem>().isMatched = true;
+                }
+            } else {
+                verticalStack.Clear();
+            }
         }
     }
 }

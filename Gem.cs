@@ -44,9 +44,11 @@ public class Gem : MonoBehaviour
             isMoving = true;
             if(!board.movingGems.Contains(this.gameObject)){
                 board.movingGems.Add(this.gameObject);
+                board.haltedGems.Add(this.gameObject);
             }
+                
             tempPosition = new Vector2(column, row); // This is where the gem should be
-            transform.position = Vector2.Lerp(transform.position, tempPosition, .05f); // This moves the position of this gem to the desired position slowly each frame
+            transform.position = Vector2.Lerp(transform.position, tempPosition, .005f); // This moves the position of this gem to the desired position slowly each frame
         } 
         else if(isMoving){
             transform.position = new Vector2(column, row); // This directly sets this gem's position to the desired position
@@ -75,6 +77,7 @@ public class Gem : MonoBehaviour
     public void DestroySelf(){
         board.allGems[column, row] = null;
         board.matchingGems.Remove(this.gameObject);
+        board.haltedGems.Remove(this.gameObject);
         Destroy(this.gameObject);
     }
 
